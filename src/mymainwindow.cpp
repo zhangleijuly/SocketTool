@@ -2,6 +2,7 @@
 
 MyMainWindow::MyMainWindow(QWidget *parent) : QMainWindow(parent)
 {
+    // Menubar
     this->setMenuBar(new QMenuBar);
 
     QMenu *menuCreate = this->menuBar()->addMenu("Create Socket");
@@ -23,6 +24,7 @@ MyMainWindow::MyMainWindow(QWidget *parent) : QMainWindow(parent)
     connect(actionDelete, &QAction::triggered, this,
             &MyMainWindow::on_actionDelete_triggered);
 
+    // Centralwidget
     this->setCentralWidget(new QWidget);
 
     m_listWidget = new QListWidget;
@@ -60,7 +62,6 @@ void MyMainWindow::on_actionUdpGroup_triggered() {}
 
 void MyMainWindow::on_actionDelete_triggered()
 {
-    qDebug() << "on_menu_triggered";
     QListWidgetItem *current = m_listWidget->currentItem();
     if (current != nullptr)
     {
@@ -97,7 +98,7 @@ void MyMainWindow::on_tcpServerCreated(QTcpServer *tcpServer)
                       .arg(tcpServer->serverAddress().toString())
                       .arg(tcpServer->serverPort());
     TcpServerMonitor *w = new TcpServerMonitor(this);
-    // w->setTcpServer(tcpServer);
+    w->setTcpServer(tcpServer);
     m_stackedWidget->addWidget(w);
     QListWidgetItem *item = new QListWidgetItem(tab, m_listWidget);
     item->setData(Qt::UserRole, QVariant::fromValue(w));
