@@ -22,13 +22,19 @@ TcpServerWidget::TcpServerWidget(QWidget *parent) : QWidget(parent)
     connect(pushButtonCancel, &QPushButton::clicked, this,
             &TcpServerWidget::on_pushButtonCancel_clicked);
 
-    QGridLayout *layout = new QGridLayout;
-    layout->addWidget(m_comboBoxIP, 0, 0, 1, 2);
-    layout->addWidget(m_spinBoxPort, 1, 0, 1, 2);
-    layout->addWidget(pushButtonOK, 2, 0);
-    layout->addWidget(pushButtonCancel, 2, 1);
+    QGridLayout *gridLayout = new QGridLayout;
+    gridLayout->addWidget(new QLabel("Server IP:"), 0, 0, Qt::AlignRight);
+    gridLayout->addWidget(m_comboBoxIP, 0, 1);
+    gridLayout->addWidget(new QLabel("Server port:"), 1, 0, Qt::AlignRight);
+    gridLayout->addWidget(m_spinBoxPort, 1, 1);
+    QHBoxLayout *hBoxLayout = new QHBoxLayout;
+    hBoxLayout->addWidget(pushButtonOK);
+    hBoxLayout->addWidget(pushButtonCancel);
+    QVBoxLayout *vBoxLayout = new QVBoxLayout;
+    vBoxLayout->addLayout(gridLayout);
+    vBoxLayout->addLayout(hBoxLayout);
 
-    setLayout(layout);
+    setLayout(vBoxLayout);
     setAttribute(Qt::WA_DeleteOnClose);
     setAttribute(Qt::WA_ShowModal);
     setWindowFlag(Qt::Tool);

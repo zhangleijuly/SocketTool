@@ -10,6 +10,8 @@
 
 #include "tcpservermonitor.h"
 #include "tcpserverwidget.h"
+#include "tcpsocketmonitor.h"
+#include "tcpsocketwidget.h"
 
 class MyMainWindow : public QMainWindow
 {

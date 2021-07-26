@@ -54,7 +54,11 @@ void MyMainWindow::on_actionTcpServer_triggered()
     w->show();
 }
 
-void MyMainWindow::on_actionTcpClient_triggered() {}
+void MyMainWindow::on_actionTcpClient_triggered()
+{
+    TcpSocketWidget *w = new TcpSocketWidget(this);
+    w->show();
+}
 
 void MyMainWindow::on_actionUdpSocket_triggered() {}
 

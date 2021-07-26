@@ -2,8 +2,9 @@
 #define TCPSERVERWIDGET_H
 
 #include <QComboBox>
-#include <QGridLayout>
 #include <QHostAddress>
+#include <QLabel>
+#include <QLayout>
 #include <QList>
 #include <QMessageBox>
 #include <QNetworkInterface>
