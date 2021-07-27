@@ -57,6 +57,8 @@ void MyMainWindow::on_actionTcpServer_triggered()
 void MyMainWindow::on_actionTcpClient_triggered()
 {
     TcpSocketWidget *w = new TcpSocketWidget(this);
+    connect(w, &TcpSocketWidget::tcpSocketCreated, this,
+            &MyMainWindow::on_tcpSocketCreated);
     w->show();
 }
 
@@ -99,10 +101,24 @@ void MyMainWindow::on_listWidget_currentItemChanged(QListWidgetItem *current)
 void MyMainWindow::on_tcpServerCreated(QTcpServer *tcpServer)
 {
     QString tab = QString("[TCP Server]-%1:%2")
-                      .arg(tcpServer->serverAddress().toString())
-                      .arg(tcpServer->serverPort());
+                      .arg(tcpServer->serverAddress().toString(),
+                           tcpServer->serverPort());
     TcpServerMonitor *w = new TcpServerMonitor(this);
     w->setTcpServer(tcpServer);
+    m_stackedWidget->addWidget(w);
+    QListWidgetItem *item = new QListWidgetItem(tab, m_listWidget);
+    item->setData(Qt::UserRole, QVariant::fromValue(w));
+    m_listWidget->addItem(item);
+    m_listWidget->setCurrentItem(item);
+}
+
+void MyMainWindow::on_tcpSocketCreated(QTcpSocket *tcpSocket,
+                                       QHostAddress hostAddress, quint16 port)
+{
+    QString tab =
+        QString("[TCP Socket]-%1:%2").arg(hostAddress.toString(), port);
+    TcpSocketMonitor *w = new TcpSocketMonitor(this);
+    w->setTcpSocket(tcpSocket, hostAddress, port);
     m_stackedWidget->addWidget(w);
     QListWidgetItem *item = new QListWidgetItem(tab, m_listWidget);
     item->setData(Qt::UserRole, QVariant::fromValue(w));

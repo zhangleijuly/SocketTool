@@ -18,6 +18,7 @@
 #include <QtNetwork/QTcpServer>
 #include <QtNetwork/QTcpSocket>
 #include <cmath>
+
 class TcpServerMonitor : public QWidget
 {
     Q_OBJECT
@@ -30,7 +31,7 @@ public:
 signals:
 
 private:
-    QLabel *m_labelSocketStatus;
+    QLabel *m_labelServerStatus;
     QLabel *m_labelServerIP;
     QLabel *m_labelServerPort;
     QLabel *m_labelClientIP;

@@ -5,7 +5,7 @@ TcpServerMonitor::TcpServerMonitor(QWidget *parent) : QWidget(parent)
     m_tcpServer = nullptr;
 
     // Server status
-    QGroupBox *groupBoxSocketStatus = new QGroupBox("Server Status");
+    QGroupBox *groupBoxServerStatus = new QGroupBox("Server Status");
 
     QGridLayout *layoutSocketStatus = new QGridLayout;
 
@@ -16,13 +16,13 @@ TcpServerMonitor::TcpServerMonitor(QWidget *parent) : QWidget(parent)
     connect(m_pushButtonStop, &QPushButton::clicked, this,
             &TcpServerMonitor::on_pushButtonStop_clicked);
 
-    m_labelSocketStatus = new QLabel;
+    m_labelServerStatus = new QLabel;
     m_labelServerIP = new QLabel;
     m_labelServerPort = new QLabel;
     m_labelClientIP = new QLabel;
     m_labelClientPort = new QLabel;
 
-    layoutSocketStatus->addWidget(m_labelSocketStatus, 0, 0);
+    layoutSocketStatus->addWidget(m_labelServerStatus, 0, 0);
     layoutSocketStatus->addWidget(m_labelClientIP, 0, 2);
     layoutSocketStatus->addWidget(m_labelClientPort, 0, 3);
     layoutSocketStatus->addWidget(m_pushButtonStart, 1, 0);
@@ -30,7 +30,7 @@ TcpServerMonitor::TcpServerMonitor(QWidget *parent) : QWidget(parent)
     layoutSocketStatus->addWidget(m_labelServerIP, 1, 2);
     layoutSocketStatus->addWidget(m_labelServerPort, 1, 3);
 
-    groupBoxSocketStatus->setLayout(layoutSocketStatus);
+    groupBoxServerStatus->setLayout(layoutSocketStatus);
 
     // Receive data
     QGroupBox *groupBoxReceiveData =
@@ -91,7 +91,7 @@ TcpServerMonitor::TcpServerMonitor(QWidget *parent) : QWidget(parent)
     // Layout
     QVBoxLayout *vBoxLayout = new QVBoxLayout;
 
-    vBoxLayout->addWidget(groupBoxSocketStatus);
+    vBoxLayout->addWidget(groupBoxServerStatus);
     vBoxLayout->addWidget(groupBoxReceiveData);
     vBoxLayout->addWidget(groupBoxSendData);
     vBoxLayout->addWidget(groupBoxSendOptions);
@@ -133,13 +133,13 @@ void TcpServerMonitor::setTcpServer(QTcpServer *tcpServer)
     {
         m_pushButtonStart->setEnabled(false);
         m_pushButtonStop->setEnabled(true);
-        m_labelSocketStatus->setText("Listening");
+        m_labelServerStatus->setText("Listening");
     }
     else
     {
         m_pushButtonStart->setEnabled(true);
         m_pushButtonStop->setEnabled(false);
-        m_labelSocketStatus->setText("Stop");
+        m_labelServerStatus->setText("Stop");
     }
 }
 
@@ -155,13 +155,13 @@ void TcpServerMonitor::on_pushButtonStart_clicked()
     {
         m_pushButtonStart->setEnabled(false);
         m_pushButtonStop->setEnabled(true);
-        m_labelSocketStatus->setText("Listening");
+        m_labelServerStatus->setText("Listening");
     }
     else
     {
         m_pushButtonStart->setEnabled(true);
         m_pushButtonStop->setEnabled(false);
-        m_labelSocketStatus->setText("Stop");
+        m_labelServerStatus->setText("Stop");
     }
 }
 
@@ -172,13 +172,13 @@ void TcpServerMonitor::on_pushButtonStop_clicked()
     {
         m_pushButtonStart->setEnabled(false);
         m_pushButtonStop->setEnabled(true);
-        m_labelSocketStatus->setText("Listening");
+        m_labelServerStatus->setText("Listening");
     }
     else
     {
         m_pushButtonStart->setEnabled(true);
         m_pushButtonStop->setEnabled(false);
-        m_labelSocketStatus->setText("Stop");
+        m_labelServerStatus->setText("Stop");
     }
 }
 
@@ -214,9 +214,9 @@ void TcpServerMonitor::on_tcpServer_newConnection()
     m_tcpSockets.append(tcpSocket);
     QHostAddress remoteIp = tcpSocket->peerAddress();
     quint16 remotePort = tcpSocket->peerPort();
-    m_comboBoxTcpSocket->addItem(QString("%1:%2").arg(remoteIp.toString().arg(
-                                     QString::number(remotePort))),
-                                 QVariant::fromValue(tcpSocket));
+    m_comboBoxTcpSocket->addItem(
+        QString("%1:%2").arg(remoteIp.toString(), remotePort),
+        QVariant::fromValue(tcpSocket));
     connect(tcpSocket, &QTcpSocket::readyRead, this,
             &TcpServerMonitor::on_tcpSocket_receiveData);
 }
@@ -225,9 +225,8 @@ void TcpServerMonitor::on_tcpSocket_receiveData()
 {
     QTcpSocket *tcpSocket = qobject_cast<QTcpSocket *>(sender());
     Q_ASSERT(tcpSocket != nullptr);
-    QString src = QString("%1:%2")
-                      .arg(tcpSocket->peerAddress().toString())
-                      .arg(QString::number(tcpSocket->peerPort()));
+    QString src = QString("%1:%2").arg(tcpSocket->peerAddress().toString(),
+                                       tcpSocket->peerPort());
     QString data = tcpSocket->readAll();
     m_lock.lock();
     m_textBrowserReceivedData->append(

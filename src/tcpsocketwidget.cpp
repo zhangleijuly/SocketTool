@@ -7,11 +7,10 @@ TcpSocketWidget::TcpSocketWidget(QWidget *parent) : QWidget(parent)
     QPushButton *pushButtonOK = new QPushButton("OK");
     QPushButton *pushButtonCancel = new QPushButton("Cancel");
 
-    QString ipRange =
-        "(([ 0]+)|([ 0]*[0-9] *)|([0-9][0-9] )|([ "
-        "0][0-9][0-9])|(1[0-9][0-9])|([2][0-4][0-9])|(25[0-5]))";
-    QRegExp ipRegex("^" + ipRange + "\\." + ipRange + "\\." + ipRange + "\\." +
-                    ipRange + "$");
+    QString ipRange = "(?:[0-1]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])";  // 255
+    QRegExp ipRegex("^" + ipRange + "(\\." + ipRange + ")" + "(\\." + ipRange +
+                    ")" + "(\\." + ipRange + ")$");
+
     QRegExpValidator *ipValidator = new QRegExpValidator(ipRegex, this);
     m_lineEditPeerIp->setValidator(ipValidator);
 

@@ -7,6 +7,7 @@
 #include <QMenu>
 #include <QMenuBar>
 #include <QStackedWidget>
+#include <QTreeWidget>
 
 #include "tcpservermonitor.h"
 #include "tcpserverwidget.h"
@@ -33,5 +34,7 @@ private slots:
     void on_actionDelete_triggered();
     void on_listWidget_currentItemChanged(QListWidgetItem *current);
     void on_tcpServerCreated(QTcpServer *tcpServer);
+    void on_tcpSocketCreated(QTcpSocket *tcpSocket, QHostAddress hostAddress,
+                             quint16 port);
 };
 #endif  // MYMAINWINDOW_H
