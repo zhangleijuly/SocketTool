@@ -1,19 +1,19 @@
-#ifndef TCPSERVERWIDGET_H
-#define TCPSERVERWIDGET_H
+#ifndef UDPSOCKETWIDGET_H
+#define UDPSOCKETWIDGET_H
 
 #include <QWidget>
 
 #include "stdafx.h"
 
-class TcpServerWidget : public QWidget
+class UdpSocketWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit TcpServerWidget(QWidget *parent = nullptr);
+    explicit UdpSocketWidget(QWidget *parent = nullptr);
 
 signals:
-    void tcpServerCreated(QTcpServer *tcpServer);
+    void udpSocketCreated(QUdpSocket *udpSocket);
 
 private:
     QComboBox *m_comboBoxIP;
@@ -24,4 +24,4 @@ private slots:
     void on_pushButtonCancel_clicked();
 };
 
-#endif  // TCPSERVERWIDGET_H
+#endif  // UDPSOCKETWIDGET_H

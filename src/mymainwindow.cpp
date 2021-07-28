@@ -27,18 +27,21 @@ MyMainWindow::MyMainWindow(QWidget *parent) : QMainWindow(parent)
     // Centralwidget
     this->setCentralWidget(new QWidget);
 
-    m_listWidget = new QListWidget;
+    m_treeWidget = new QTreeWidget;
+    m_treeWidget->setColumnCount(1);
+    m_treeWidget->setHeaderHidden(true);
+    m_treeWidget->setRootIsDecorated(false);
     m_stackedWidget = new QStackedWidget;
 
-    m_listWidget->setMinimumWidth(200);
-    m_listWidget->setMaximumWidth(400);
+    m_treeWidget->setMinimumWidth(200);
+    m_treeWidget->setMaximumWidth(600);
     m_stackedWidget->setMinimumWidth(600);
-    connect(m_listWidget, &QListWidget::currentItemChanged, this,
-            &MyMainWindow::on_listWidget_currentItemChanged);
+    connect(m_treeWidget, &QTreeWidget::currentItemChanged, this,
+            &MyMainWindow::on_treeWidget_currentItemChanged);
 
     QHBoxLayout *layout = new QHBoxLayout;
 
-    layout->addWidget(m_listWidget);
+    layout->addWidget(m_treeWidget);
     layout->addWidget(m_stackedWidget);
 
     this->centralWidget()->setLayout(layout);
@@ -62,31 +65,47 @@ void MyMainWindow::on_actionTcpClient_triggered()
     w->show();
 }
 
-void MyMainWindow::on_actionUdpSocket_triggered() {}
+void MyMainWindow::on_actionUdpSocket_triggered()
+{
+    UdpSocketWidget *w = new UdpSocketWidget(this);
+    connect(w, &UdpSocketWidget::udpSocketCreated, this,
+            &MyMainWindow::on_udpSocketCreated);
+    w->show();
+}
 
 void MyMainWindow::on_actionUdpGroup_triggered() {}
 
 void MyMainWindow::on_actionDelete_triggered()
 {
-    QListWidgetItem *current = m_listWidget->currentItem();
+    QTreeWidgetItem *current = m_treeWidget->currentItem();
     if (current != nullptr)
     {
-        QWidget *w = current->data(Qt::UserRole).value<QWidget *>();
+        QWidget *w = current->data(0, Qt::UserRole).value<QWidget *>();
         if (w != nullptr)
         {
-            m_listWidget->removeItemWidget(current);
-            delete current;
+            QTreeWidgetItem *parent = current->parent();
+            int index;
+            if (parent)
+            {
+                index = parent->indexOfChild(current);
+                delete parent->takeChild(index);
+            }
+            else
+            {
+                index = m_treeWidget->indexOfTopLevelItem(current);
+                delete m_treeWidget->takeTopLevelItem(index);
+            }
             m_stackedWidget->removeWidget(w);
             w->deleteLater();
         }
     }
 }
 
-void MyMainWindow::on_listWidget_currentItemChanged(QListWidgetItem *current)
+void MyMainWindow::on_treeWidget_currentItemChanged(QTreeWidgetItem *current)
 {
     if (current != nullptr)
     {
-        QWidget *w = current->data(Qt::UserRole).value<QWidget *>();
+        QWidget *w = current->data(0, Qt::UserRole).value<QWidget *>();
         if (w != nullptr)
         {
             m_stackedWidget->setCurrentWidget(w);
@@ -101,27 +120,59 @@ void MyMainWindow::on_listWidget_currentItemChanged(QListWidgetItem *current)
 void MyMainWindow::on_tcpServerCreated(QTcpServer *tcpServer)
 {
     QString tab = QString("[TCP Server]-%1:%2")
-                      .arg(tcpServer->serverAddress().toString(),
-                           tcpServer->serverPort());
+                      .arg(tcpServer->serverAddress().toString())
+                      .arg(tcpServer->serverPort());
     TcpServerMonitor *w = new TcpServerMonitor(this);
     w->setTcpServer(tcpServer);
     m_stackedWidget->addWidget(w);
-    QListWidgetItem *item = new QListWidgetItem(tab, m_listWidget);
-    item->setData(Qt::UserRole, QVariant::fromValue(w));
-    m_listWidget->addItem(item);
-    m_listWidget->setCurrentItem(item);
+    connect(w, &TcpServerMonitor::tcpSocketConnected, this,
+            &MyMainWindow::on_tcpSocketConnected);
+    QTreeWidgetItem *item = new QTreeWidgetItem(m_treeWidget);
+    item->setText(0, tab);
+    item->setData(0, Qt::UserRole, QVariant::fromValue(w));
+    m_treeWidget->setCurrentItem(item);
 }
 
 void MyMainWindow::on_tcpSocketCreated(QTcpSocket *tcpSocket,
                                        QHostAddress hostAddress, quint16 port)
 {
     QString tab =
-        QString("[TCP Socket]-%1:%2").arg(hostAddress.toString(), port);
+        QString("[TCP Socket]-%1:%2").arg(hostAddress.toString()).arg(port);
     TcpSocketMonitor *w = new TcpSocketMonitor(this);
     w->setTcpSocket(tcpSocket, hostAddress, port);
     m_stackedWidget->addWidget(w);
-    QListWidgetItem *item = new QListWidgetItem(tab, m_listWidget);
-    item->setData(Qt::UserRole, QVariant::fromValue(w));
-    m_listWidget->addItem(item);
-    m_listWidget->setCurrentItem(item);
+    QTreeWidgetItem *item = new QTreeWidgetItem(m_treeWidget);
+    item->setText(0, tab);
+    item->setData(0, Qt::UserRole, QVariant::fromValue(w));
+    m_treeWidget->setCurrentItem(item);
 }
+
+void MyMainWindow::on_tcpSocketConnected(QTcpSocket *tcpSocket,
+                                         QHostAddress hostAddress, quint16 port)
+{
+    QString tab =
+        QString("[TCP Socket]-%1:%2").arg(hostAddress.toString()).arg(port);
+    TcpSocketMonitor *w = new TcpSocketMonitor(this);
+    w->setTcpSocket(tcpSocket, hostAddress, port);
+    m_stackedWidget->addWidget(w);
+    TcpServerMonitor *monitor = qobject_cast<TcpServerMonitor *>(sender());
+    connect(w, &TcpSocketMonitor::tcpSocketReceivedData, monitor,
+            &TcpServerMonitor::on_tcpSocket_receiveData);
+    int size = m_treeWidget->topLevelItemCount();
+    QTreeWidgetItem *parent;
+    QTreeWidgetItem *item;
+    for (int i = 0; i < size; ++i)
+    {
+        parent = m_treeWidget->topLevelItem(i);
+        if (monitor == parent->data(0, Qt::UserRole).value<QObject *>())
+        {
+            item = new QTreeWidgetItem(parent);
+            item->setText(0, tab);
+            item->setData(0, Qt::UserRole, QVariant::fromValue(w));
+            m_treeWidget->setCurrentItem(item);
+            break;
+        }
+    }
+}
+
+void MyMainWindow::on_udpSocketCreated(QUdpSocket *udpSocket) {}

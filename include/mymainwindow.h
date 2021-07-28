@@ -1,18 +1,9 @@
 #ifndef MYMAINWINDOW_H
 #define MYMAINWINDOW_H
 
-#include <QHBoxLayout>
-#include <QListWidget>
 #include <QMainWindow>
-#include <QMenu>
-#include <QMenuBar>
-#include <QStackedWidget>
-#include <QTreeWidget>
 
-#include "tcpservermonitor.h"
-#include "tcpserverwidget.h"
-#include "tcpsocketmonitor.h"
-#include "tcpsocketwidget.h"
+#include "stdafx.h"
 
 class MyMainWindow : public QMainWindow
 {
@@ -23,7 +14,7 @@ public:
     ~MyMainWindow();
 
 private:
-    QListWidget *m_listWidget;
+    QTreeWidget *m_treeWidget;
     QStackedWidget *m_stackedWidget;
 
 private slots:
@@ -32,9 +23,12 @@ private slots:
     void on_actionUdpSocket_triggered();
     void on_actionUdpGroup_triggered();
     void on_actionDelete_triggered();
-    void on_listWidget_currentItemChanged(QListWidgetItem *current);
+    void on_treeWidget_currentItemChanged(QTreeWidgetItem *current);
     void on_tcpServerCreated(QTcpServer *tcpServer);
     void on_tcpSocketCreated(QTcpSocket *tcpSocket, QHostAddress hostAddress,
                              quint16 port);
+    void on_tcpSocketConnected(QTcpSocket *tcpSocket, QHostAddress hostAddress,
+                               quint16 port);
+    void on_udpSocketCreated(QUdpSocket *udpSocket);
 };
 #endif  // MYMAINWINDOW_H

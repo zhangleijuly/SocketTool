@@ -1,21 +1,9 @@
 #ifndef TCPSOCKETMONITOR_H
 #define TCPSOCKETMONITOR_H
 
-#include <QComboBox>
-#include <QGroupBox>
-#include <QHostAddress>
-#include <QLabel>
-#include <QLayout>
-#include <QLineEdit>
-#include <QMutex>
-#include <QNetworkProxy>
-#include <QPushButton>
-#include <QTextBrowser>
-#include <QTime>
-#include <QTimer>
 #include <QWidget>
-#include <QtNetwork/QTcpSocket>
-#include <cmath>
+
+#include "stdafx.h"
 
 class TcpSocketMonitor : public QWidget
 {
@@ -24,11 +12,11 @@ class TcpSocketMonitor : public QWidget
 public:
     explicit TcpSocketMonitor(QWidget *parent = nullptr);
     ~TcpSocketMonitor();
-
     void setTcpSocket(QTcpSocket *tcpSocket, QHostAddress hostAddress,
                       quint16 port);
 
 signals:
+    void tcpSocketReceivedData(QString info, QString data);
 
 private:
     QTcpSocket *m_tcpSocket;
@@ -60,7 +48,7 @@ private slots:
     void on_tcpSocket_connect();
     void on_tcpSocket_disconnect();
     void on_tcpSocket_readyRead();
-    void on_tcpSocket_error();
+    void on_tcpSocket_error(QAbstractSocket::SocketError);
     void on_timer_timeout();
 };
 

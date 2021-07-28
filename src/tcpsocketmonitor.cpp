@@ -118,15 +118,11 @@ void TcpSocketMonitor::setTcpSocket(QTcpSocket *tcpSocket,
     m_peerIP = hostAddress;
     m_peerPort = port;
 
-    on_tcpSocket_stateChanged(m_tcpSocket->state());
-    m_labelLocalIP->setText(
-        QString("Local IP: %1").arg(m_tcpSocket->localAddress().toString()));
-    m_labelLocalPort->setText(
-        QString("Local port: %1").arg(m_tcpSocket->localPort()));
-    m_labelPeerIP->setText(QString("Peer IP: %1").arg(m_peerIP.toString()));
-    m_labelPeerPort->setText(QString("Peer port: %1").arg(m_peerPort));
     m_pushButtonConnect->setEnabled(true);
     m_pushButtonDisconnect->setEnabled(false);
+    on_tcpSocket_stateChanged(m_tcpSocket->state());
+    m_labelPeerIP->setText(QString("Peer IP: %1").arg(m_peerIP.toString()));
+    m_labelPeerPort->setText(QString("Peer port: %1").arg(m_peerPort));
 
     connect(m_tcpSocket, &QTcpSocket::connected, this,
             &TcpSocketMonitor::on_tcpSocket_connect);
@@ -136,19 +132,25 @@ void TcpSocketMonitor::setTcpSocket(QTcpSocket *tcpSocket,
             &TcpSocketMonitor::on_tcpSocket_stateChanged);
     connect(m_tcpSocket, &QTcpSocket::readyRead, this,
             &TcpSocketMonitor::on_tcpSocket_readyRead);
-    connect(m_tcpSocket, SIGNAL(error), this, SLOT(on_tcpSocket_error));
+    connect(m_tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)), this,
+            SLOT(on_tcpSocket_error(QAbstractSocket::SocketError)));
 }
 
 void TcpSocketMonitor::on_pushButtonConnect_clicked()
 {
     m_tcpSocket->connectToHost(m_peerIP, m_peerPort);
-    qDebug() << m_peerIP << ":" << m_peerPort;
     m_pushButtonConnect->setEnabled(false);
+    m_labelLocalIP->setText(
+        QString("Local IP: %1").arg(m_tcpSocket->localAddress().toString()));
+    m_labelLocalPort->setText(
+        QString("Local port: %1").arg(m_tcpSocket->localPort()));
 }
 
 void TcpSocketMonitor::on_pushButtonDisconnect_clicked()
 {
     m_tcpSocket->disconnectFromHost();
+    m_labelLocalIP->clear();
+    m_labelLocalPort->clear();
 }
 
 void TcpSocketMonitor::on_pushButtonSendPeriod_clicked()
@@ -184,6 +186,10 @@ void TcpSocketMonitor::on_tcpSocket_stateChanged(
     {
         case QAbstractSocket::UnconnectedState:
             m_labelSocketStatus->setText("Unconnected");
+            m_pushButtonConnect->setEnabled(true);
+            m_pushButtonDisconnect->setEnabled(false);
+            m_labelLocalIP->clear();
+            m_labelLocalPort->clear();
             break;
         case QAbstractSocket::HostLookupState:
             m_labelSocketStatus->setText("Looking up host");
@@ -193,6 +199,13 @@ void TcpSocketMonitor::on_tcpSocket_stateChanged(
             break;
         case QAbstractSocket::ConnectedState:
             m_labelSocketStatus->setText("Connected");
+            m_pushButtonConnect->setEnabled(false);
+            m_pushButtonDisconnect->setEnabled(true);
+            m_labelLocalIP->setText(
+                QString("Local IP: %1")
+                    .arg(m_tcpSocket->localAddress().toString()));
+            m_labelLocalPort->setText(
+                QString("Local port: %1").arg(m_tcpSocket->localPort()));
             break;
         case QAbstractSocket::BoundState:
             m_labelSocketStatus->setText("Bound");
@@ -206,9 +219,6 @@ void TcpSocketMonitor::on_tcpSocket_stateChanged(
         default:
             break;
     }
-
-    m_labelLocalPort->setText(
-        QString("Local port: %1").arg(m_tcpSocket->localPort()));
 }
 
 void TcpSocketMonitor::on_tcpSocket_connect()
@@ -227,16 +237,17 @@ void TcpSocketMonitor::on_tcpSocket_readyRead()
 {
     if (m_tcpSocket != nullptr && m_tcpSocket->bytesAvailable() > 0)
     {
-        QString src = QString("%1:%2").arg(m_peerIP.toString(), m_peerPort);
+        QString src = QString("%1:%2").arg(m_peerIP.toString()).arg(m_peerPort);
+        QString info = QString("%1 Receiced data from %2:")
+                           .arg(QTime::currentTime().toString(), src);
         QString data = m_tcpSocket->readAll();
-        m_textBrowserReceivedData->append(
-            QString("%1 Receiced data from %2:")
-                .arg(QTime::currentTime().toString(), src));
+        m_textBrowserReceivedData->append(info);
         m_textBrowserReceivedData->append(data);
+        emit tcpSocketReceivedData(info, data);
     }
 }
 
-void TcpSocketMonitor::on_tcpSocket_error()
+void TcpSocketMonitor::on_tcpSocket_error(QAbstractSocket::SocketError)
 {
     QString msg =
         QString("%1 Error: %2")
@@ -252,8 +263,8 @@ void TcpSocketMonitor::on_timer_timeout()
         m_tcpSocket->write(data.toUtf8());
         m_textBrowserReceivedData->append(
             QString("%1 Send data to %2:%3 :")
-                .arg(QTime::currentTime().toString(), m_peerIP.toString(),
-                     QString::number(m_peerPort)));
+                .arg(QTime::currentTime().toString(), m_peerIP.toString())
+                .arg(m_peerPort));
         m_textBrowserReceivedData->append(data);
     }
     if (++m_currentTimes == m_totalTimes)

@@ -19,12 +19,8 @@ TcpServerMonitor::TcpServerMonitor(QWidget *parent) : QWidget(parent)
     m_labelServerStatus = new QLabel;
     m_labelServerIP = new QLabel;
     m_labelServerPort = new QLabel;
-    m_labelClientIP = new QLabel;
-    m_labelClientPort = new QLabel;
 
     layoutSocketStatus->addWidget(m_labelServerStatus, 0, 0);
-    layoutSocketStatus->addWidget(m_labelClientIP, 0, 2);
-    layoutSocketStatus->addWidget(m_labelClientPort, 0, 3);
     layoutSocketStatus->addWidget(m_pushButtonStart, 1, 0);
     layoutSocketStatus->addWidget(m_pushButtonStop, 1, 1);
     layoutSocketStatus->addWidget(m_labelServerIP, 1, 2);
@@ -41,60 +37,11 @@ TcpServerMonitor::TcpServerMonitor(QWidget *parent) : QWidget(parent)
     groupBoxReceiveData->setLayout(new QVBoxLayout);
     groupBoxReceiveData->layout()->addWidget(m_textBrowserReceivedData);
 
-    // Send data
-    QGroupBox *groupBoxSendData = new QGroupBox("Send data");
-
-    m_textEditSendData = new QTextEdit;
-
-    groupBoxSendData->setLayout(new QVBoxLayout);
-    groupBoxSendData->layout()->addWidget(m_textEditSendData);
-
-    // Send data options
-    QGroupBox *groupBoxSendOptions = new QGroupBox("Send options");
-
-    m_comboBoxTcpSocket = new QComboBox;
-    m_comboBoxNumberSend = new QComboBox;
-    m_lineEditInterval = new QLineEdit("100");
-    QPushButton *pushButtonSend = new QPushButton("Send data");
-    QPushButton *pushButtonSendPeriod = new QPushButton("Cycle sending");
-    QPushButton *pushButtonStopSend = new QPushButton("Stop sending");
-    connect(pushButtonSend, &QPushButton::clicked, this,
-            &TcpServerMonitor::on_pushButtonSend_clicked);
-    connect(pushButtonSendPeriod, &QPushButton::clicked, this,
-            &TcpServerMonitor::on_pushButtonSendPeriod_clicked);
-    connect(pushButtonStopSend, &QPushButton::clicked, this,
-            &TcpServerMonitor::on_pushButtonStopSend_clicked);
-
-    for (int i = 1; i < 5; ++i)
-    {
-        int temp = pow(10, i);
-        m_comboBoxNumberSend->addItem(QString::number(temp), temp);
-    }
-
-    QGridLayout *gridLayoutSendOptions = new QGridLayout;
-
-    gridLayoutSendOptions->addWidget(new QLabel("Destination"), 0, 0,
-                                     Qt::AlignRight);
-    gridLayoutSendOptions->addWidget(new QLabel("Send times"), 1, 0,
-                                     Qt::AlignRight);
-    gridLayoutSendOptions->addWidget(new QLabel("Send interval(ms)"), 2, 0,
-                                     Qt::AlignRight);
-    gridLayoutSendOptions->addWidget(m_comboBoxTcpSocket, 0, 1, Qt::AlignLeft);
-    gridLayoutSendOptions->addWidget(m_comboBoxNumberSend, 1, 1, Qt::AlignLeft);
-    gridLayoutSendOptions->addWidget(m_lineEditInterval, 2, 1, Qt::AlignLeft);
-    gridLayoutSendOptions->addWidget(pushButtonSend, 0, 2);
-    gridLayoutSendOptions->addWidget(pushButtonSendPeriod, 1, 2);
-    gridLayoutSendOptions->addWidget(pushButtonStopSend, 2, 2);
-
-    groupBoxSendOptions->setLayout(gridLayoutSendOptions);
-
     // Layout
     QVBoxLayout *vBoxLayout = new QVBoxLayout;
 
     vBoxLayout->addWidget(groupBoxServerStatus);
     vBoxLayout->addWidget(groupBoxReceiveData);
-    vBoxLayout->addWidget(groupBoxSendData);
-    vBoxLayout->addWidget(groupBoxSendOptions);
 
     setLayout(vBoxLayout);
 }
@@ -122,8 +69,8 @@ void TcpServerMonitor::setTcpServer(QTcpServer *tcpServer)
 
     connect(m_tcpServer, &QTcpServer::newConnection, this,
             &TcpServerMonitor::on_tcpServer_newConnection);
-    // connect(m_tcpServer, SIGNAL(acceptError(QAbstractSocket::SocketError)),
-    // this, SLOT(acceptSocketError(QAbstractSocket::SocketError)));
+    connect(m_tcpServer, &QTcpServer::acceptError, this,
+            &TcpServerMonitor::on_tcpServer_acceptError);
     m_labelServerIP->setText(
         QString("Server IP: %1").arg(m_hostAddress.toString()));
     m_labelServerPort->setText(
@@ -182,55 +129,23 @@ void TcpServerMonitor::on_pushButtonStop_clicked()
     }
 }
 
-void TcpServerMonitor::on_pushButtonSend_clicked()
-{
-    if (m_comboBoxTcpSocket->currentIndex() == -1)
-    {
-        return;
-    }
-    else
-    {
-        QString dest = m_comboBoxTcpSocket->currentText();
-        QTcpSocket *tcpSocket =
-            m_comboBoxTcpSocket->currentData().value<QTcpSocket *>();
-        Q_ASSERT(tcpSocket != nullptr);
-        QString data = m_textEditSendData->toPlainText();
-        tcpSocket->write(data.toLocal8Bit());
-        m_lock.lock();
-        m_textBrowserReceivedData->append(
-            QString("Send data to %1:").arg(dest));
-        m_textBrowserReceivedData->append(data);
-        m_lock.unlock();
-    }
-}
-
-void TcpServerMonitor::on_pushButtonSendPeriod_clicked() {}
-
-void TcpServerMonitor::on_pushButtonStopSend_clicked() {}
-
 void TcpServerMonitor::on_tcpServer_newConnection()
 {
     QTcpSocket *tcpSocket = m_tcpServer->nextPendingConnection();
-    m_tcpSockets.append(tcpSocket);
-    QHostAddress remoteIp = tcpSocket->peerAddress();
-    quint16 remotePort = tcpSocket->peerPort();
-    m_comboBoxTcpSocket->addItem(
-        QString("%1:%2").arg(remoteIp.toString(), remotePort),
-        QVariant::fromValue(tcpSocket));
-    connect(tcpSocket, &QTcpSocket::readyRead, this,
-            &TcpServerMonitor::on_tcpSocket_receiveData);
+    emit tcpSocketConnected(tcpSocket, tcpSocket->peerAddress(),
+                            tcpSocket->peerPort());
 }
 
-void TcpServerMonitor::on_tcpSocket_receiveData()
+void TcpServerMonitor::on_tcpServer_acceptError()
 {
-    QTcpSocket *tcpSocket = qobject_cast<QTcpSocket *>(sender());
-    Q_ASSERT(tcpSocket != nullptr);
-    QString src = QString("%1:%2").arg(tcpSocket->peerAddress().toString(),
-                                       tcpSocket->peerPort());
-    QString data = tcpSocket->readAll();
-    m_lock.lock();
-    m_textBrowserReceivedData->append(
-        QString("Receiced data from %1:").arg(src));
+    QString msg =
+        QString("%1 Error: %2")
+            .arg(QTime::currentTime().toString(), m_tcpServer->errorString());
+    m_textBrowserReceivedData->append(msg);
+}
+
+void TcpServerMonitor::on_tcpSocket_receiveData(QString info, QString data)
+{
+    m_textBrowserReceivedData->append(info);
     m_textBrowserReceivedData->append(data);
-    m_lock.unlock();
 }

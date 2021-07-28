@@ -1,16 +1,9 @@
 #ifndef TCPSOCKETWIDGET_H
 #define TCPSOCKETWIDGET_H
 
-#include <QHostAddress>
-#include <QLabel>
-#include <QLayout>
-#include <QLineEdit>
-#include <QPushButton>
-#include <QRegExp>
-#include <QSpinBox>
-#include <QValidator>
 #include <QWidget>
-#include <QtNetwork/QTcpSocket>
+
+#include "stdafx.h"
 
 class TcpSocketWidget : public QWidget
 {

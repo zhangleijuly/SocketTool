@@ -9,6 +9,8 @@ CONFIG += c++11
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    src/udpsocketmonitor.cpp \
+    src/udpsocketwidget.cpp \
     src/tcpsocketmonitor.cpp \
     src/tcpsocketwidget.cpp \
     src/tcpservermonitor.cpp \
@@ -18,10 +20,13 @@ SOURCES += \
 
 HEADERS += \
     include/mymainwindow.h \
+    include/stdafx.h \
     include/tcpserverwidget.h \
     include/tcpservermonitor.h \
     include/tcpsocketmonitor.h \
-    include/tcpsocketwidget.h
+    include/tcpsocketwidget.h \
+    include/udpsocketmonitor.h \
+    include/udpsocketwidget.h
 
 INCLUDEPATH += include
 
