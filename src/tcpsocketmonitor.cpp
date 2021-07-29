@@ -93,6 +93,9 @@ TcpSocketMonitor::TcpSocketMonitor(QWidget *parent) : QWidget(parent)
     vBoxLayout->addWidget(groupBoxSendOptions);
 
     setLayout(vBoxLayout);
+
+    connect(&m_timer, &QTimer::timeout, this,
+            &TcpSocketMonitor::on_timer_timeout);
 }
 
 TcpSocketMonitor::~TcpSocketMonitor()
@@ -162,8 +165,6 @@ void TcpSocketMonitor::on_pushButtonSendPeriod_clicked()
         m_timer.start(interval);
         m_currentTimes = 0;
         m_totalTimes = m_comboBoxNumberSend->currentData().toInt();
-        connect(&m_timer, &QTimer::timeout, this,
-                &TcpSocketMonitor::on_timer_timeout);
     }
     else
     {

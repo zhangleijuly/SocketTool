@@ -30,5 +30,6 @@ private slots:
     void on_tcpSocketConnected(QTcpSocket *tcpSocket, QHostAddress hostAddress,
                                quint16 port);
     void on_udpSocketCreated(QUdpSocket *udpSocket);
+    void on_udpMulticastCreated(QUdpSocket *udpSocket, QString multicastIP);
 };
 #endif  // MYMAINWINDOW_H

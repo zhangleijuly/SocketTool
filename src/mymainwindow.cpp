@@ -73,7 +73,13 @@ void MyMainWindow::on_actionUdpSocket_triggered()
     w->show();
 }
 
-void MyMainWindow::on_actionUdpGroup_triggered() {}
+void MyMainWindow::on_actionUdpGroup_triggered()
+{
+    UdpGroupWidget *w = new UdpGroupWidget(this);
+    connect(w, &UdpGroupWidget::udpMulticastCreated, this,
+            &MyMainWindow::on_udpMulticastCreated);
+    w->show();
+}
 
 void MyMainWindow::on_actionDelete_triggered()
 {
@@ -175,4 +181,32 @@ void MyMainWindow::on_tcpSocketConnected(QTcpSocket *tcpSocket,
     }
 }
 
-void MyMainWindow::on_udpSocketCreated(QUdpSocket *udpSocket) {}
+void MyMainWindow::on_udpSocketCreated(QUdpSocket *udpSocket)
+{
+    QString tab = QString("[UDP Socket]-%1:%2")
+                      .arg(udpSocket->localAddress().toString())
+                      .arg(udpSocket->localPort());
+    UdpSocketMonitor *w = new UdpSocketMonitor(this);
+    w->setUdpSocket(udpSocket);
+    m_stackedWidget->addWidget(w);
+    QTreeWidgetItem *item = new QTreeWidgetItem(m_treeWidget);
+    item->setText(0, tab);
+    item->setData(0, Qt::UserRole, QVariant::fromValue(w));
+    m_treeWidget->setCurrentItem(item);
+}
+
+void MyMainWindow::on_udpMulticastCreated(QUdpSocket *udpSocket,
+                                          QString multicastIP)
+{
+    QString tab = QString("[UDP Socket]-%1:%2(%3)")
+                      .arg(udpSocket->localAddress().toString())
+                      .arg(udpSocket->localPort())
+                      .arg(multicastIP);
+    UdpSocketMonitor *w = new UdpSocketMonitor(this);
+    w->setUdpMulticast(udpSocket, multicastIP);
+    m_stackedWidget->addWidget(w);
+    QTreeWidgetItem *item = new QTreeWidgetItem(m_treeWidget);
+    item->setText(0, tab);
+    item->setData(0, Qt::UserRole, QVariant::fromValue(w));
+    m_treeWidget->setCurrentItem(item);
+}

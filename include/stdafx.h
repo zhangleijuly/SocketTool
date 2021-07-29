@@ -38,6 +38,7 @@
 #include "tcpserverwidget.h"
 #include "tcpsocketmonitor.h"
 #include "tcpsocketwidget.h"
+#include "udpgroupwidget.h"
 #include "udpsocketmonitor.h"
 #include "udpsocketwidget.h"
 
