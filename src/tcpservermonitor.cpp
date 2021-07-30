@@ -5,12 +5,10 @@ TcpServerMonitor::TcpServerMonitor(QWidget *parent) : QWidget(parent)
     m_tcpServer = nullptr;
 
     // Server status
-    QGroupBox *groupBoxServerStatus = new QGroupBox("Server Status");
+    QGroupBox *groupBoxServerStatus = new QGroupBox(tr("Server Status"));
 
-    QGridLayout *layoutSocketStatus = new QGridLayout;
-
-    m_pushButtonStart = new QPushButton("Start listening");
-    m_pushButtonStop = new QPushButton("Stop listening");
+    m_pushButtonStart = new QPushButton(tr("Start listening"));
+    m_pushButtonStop = new QPushButton(tr("Stop listening"));
     connect(m_pushButtonStart, &QPushButton::clicked, this,
             &TcpServerMonitor::on_pushButtonStart_clicked);
     connect(m_pushButtonStop, &QPushButton::clicked, this,
@@ -20,17 +18,33 @@ TcpServerMonitor::TcpServerMonitor(QWidget *parent) : QWidget(parent)
     m_labelServerIP = new QLabel;
     m_labelServerPort = new QLabel;
 
-    layoutSocketStatus->addWidget(m_labelServerStatus, 0, 0);
-    layoutSocketStatus->addWidget(m_pushButtonStart, 1, 0);
-    layoutSocketStatus->addWidget(m_pushButtonStop, 1, 1);
-    layoutSocketStatus->addWidget(m_labelServerIP, 1, 2);
-    layoutSocketStatus->addWidget(m_labelServerPort, 1, 3);
+    QVBoxLayout *layoutSocketStatus = new QVBoxLayout;
+    QHBoxLayout *layoutSocketStatusR1 = new QHBoxLayout;
+    QHBoxLayout *layoutSocketStatusR2 = new QHBoxLayout;
+
+    layoutSocketStatusR1->addWidget(m_labelServerStatus);
+    m_labelServerStatus->setAlignment(Qt::AlignHCenter);
+    m_labelServerStatus->setMinimumWidth(200);
+    layoutSocketStatusR1->addStretch();
+
+    layoutSocketStatusR2->addWidget(m_pushButtonStart);
+    m_pushButtonStart->setMinimumWidth(200);
+    layoutSocketStatusR2->addSpacing(5);
+    layoutSocketStatusR2->addWidget(m_pushButtonStop);
+    m_pushButtonStop->setMinimumWidth(200);
+    layoutSocketStatusR2->addStretch();
+    layoutSocketStatusR2->addWidget(m_labelServerIP);
+    layoutSocketStatusR2->addSpacing(5);
+    layoutSocketStatusR2->addWidget(m_labelServerPort);
+
+    layoutSocketStatus->addLayout(layoutSocketStatusR1);
+    layoutSocketStatus->addLayout(layoutSocketStatusR2);
 
     groupBoxServerStatus->setLayout(layoutSocketStatus);
 
     // Receive data
     QGroupBox *groupBoxReceiveData =
-        new QGroupBox("Received data and notification");
+        new QGroupBox(tr("Received data and notification"));
 
     m_textBrowserReceivedData = new QTextBrowser;
 
@@ -71,22 +85,21 @@ void TcpServerMonitor::setTcpServer(QTcpServer *tcpServer)
             &TcpServerMonitor::on_tcpServer_newConnection);
     connect(m_tcpServer, &QTcpServer::acceptError, this,
             &TcpServerMonitor::on_tcpServer_acceptError);
-    m_labelServerIP->setText(
-        QString("Server IP: %1").arg(m_hostAddress.toString()));
+    m_labelServerIP->setText(tr("Server IP: %1").arg(m_hostAddress.toString()));
     m_labelServerPort->setText(
-        QString("Server port: %1").arg(QString::number(m_port)));
+        tr("Server port: %1").arg(QString::number(m_port)));
 
     if (m_tcpServer->isListening())
     {
         m_pushButtonStart->setEnabled(false);
         m_pushButtonStop->setEnabled(true);
-        m_labelServerStatus->setText("Listening");
+        m_labelServerStatus->setText(tr("Listening"));
     }
     else
     {
         m_pushButtonStart->setEnabled(true);
         m_pushButtonStop->setEnabled(false);
-        m_labelServerStatus->setText("Stop");
+        m_labelServerStatus->setText(tr("Stop"));
     }
 }
 
@@ -94,21 +107,21 @@ void TcpServerMonitor::on_pushButtonStart_clicked()
 {
     if (!m_tcpServer->listen(m_hostAddress, m_port))
     {
-        QString estr = QString("Start TCP server failed! %1")
-                           .arg(m_tcpServer->errorString());
+        QString estr =
+            tr("Start TCP server failed! %1").arg(m_tcpServer->errorString());
         QMessageBox::critical(this, tr("Error"), estr);
     }
     if (m_tcpServer->isListening())
     {
         m_pushButtonStart->setEnabled(false);
         m_pushButtonStop->setEnabled(true);
-        m_labelServerStatus->setText("Listening");
+        m_labelServerStatus->setText(tr("Listening"));
     }
     else
     {
         m_pushButtonStart->setEnabled(true);
         m_pushButtonStop->setEnabled(false);
-        m_labelServerStatus->setText("Stop");
+        m_labelServerStatus->setText(tr("Stop"));
     }
 }
 
@@ -119,13 +132,13 @@ void TcpServerMonitor::on_pushButtonStop_clicked()
     {
         m_pushButtonStart->setEnabled(false);
         m_pushButtonStop->setEnabled(true);
-        m_labelServerStatus->setText("Listening");
+        m_labelServerStatus->setText(tr("Listening"));
     }
     else
     {
         m_pushButtonStart->setEnabled(true);
         m_pushButtonStop->setEnabled(false);
-        m_labelServerStatus->setText("Stop");
+        m_labelServerStatus->setText(tr("Stop"));
     }
 }
 
@@ -139,7 +152,7 @@ void TcpServerMonitor::on_tcpServer_newConnection()
 void TcpServerMonitor::on_tcpServer_acceptError()
 {
     QString msg =
-        QString("%1 Error: %2")
+        tr("%1 Error: %2")
             .arg(QTime::currentTime().toString(), m_tcpServer->errorString());
     m_textBrowserReceivedData->append(msg);
 }

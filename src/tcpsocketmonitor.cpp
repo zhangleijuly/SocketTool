@@ -9,12 +9,10 @@ TcpSocketMonitor::TcpSocketMonitor(QWidget *parent) : QWidget(parent)
     m_totalTimes = 0;
 
     // Socket status
-    QGroupBox *groupBoxSocketStatus = new QGroupBox("Socket Status");
+    QGroupBox *groupBoxSocketStatus = new QGroupBox(tr("Socket Status"));
 
-    QGridLayout *layoutSocketStatus = new QGridLayout;
-
-    m_pushButtonConnect = new QPushButton("Connect");
-    m_pushButtonDisconnect = new QPushButton("Disconnect");
+    m_pushButtonConnect = new QPushButton(tr("Connect"));
+    m_pushButtonDisconnect = new QPushButton(tr("Disconnect"));
     connect(m_pushButtonConnect, &QPushButton::clicked, this,
             &TcpSocketMonitor::on_pushButtonConnect_clicked);
     connect(m_pushButtonDisconnect, &QPushButton::clicked, this,
@@ -26,19 +24,38 @@ TcpSocketMonitor::TcpSocketMonitor(QWidget *parent) : QWidget(parent)
     m_labelPeerIP = new QLabel;
     m_labelPeerPort = new QLabel;
 
-    layoutSocketStatus->addWidget(m_labelSocketStatus, 0, 0);
-    layoutSocketStatus->addWidget(m_labelLocalIP, 0, 2);
-    layoutSocketStatus->addWidget(m_labelLocalPort, 0, 3);
-    layoutSocketStatus->addWidget(m_pushButtonConnect, 1, 0);
-    layoutSocketStatus->addWidget(m_pushButtonDisconnect, 1, 1);
-    layoutSocketStatus->addWidget(m_labelPeerIP, 1, 2);
-    layoutSocketStatus->addWidget(m_labelPeerPort, 1, 3);
+    QVBoxLayout *layoutSocketStatus = new QVBoxLayout;
+    QHBoxLayout *layoutSocketStatusR1 = new QHBoxLayout;
+    QHBoxLayout *layoutSocketStatusR2 = new QHBoxLayout;
+
+    layoutSocketStatusR1->addWidget(m_labelSocketStatus);
+    m_labelSocketStatus->setMinimumWidth(200);
+    m_labelSocketStatus->setAlignment(Qt::AlignHCenter);
+    layoutSocketStatusR1->addStretch();
+    layoutSocketStatusR1->addWidget(m_labelLocalIP);
+    layoutSocketStatusR1->addSpacing(5);
+    layoutSocketStatusR1->addWidget(m_labelLocalPort);
+    m_labelLocalPort->setMinimumWidth(200);
+
+    layoutSocketStatusR2->addWidget(m_pushButtonConnect);
+    m_pushButtonConnect->setMinimumWidth(200);
+    layoutSocketStatusR2->addSpacing(5);
+    layoutSocketStatusR2->addWidget(m_pushButtonDisconnect);
+    m_pushButtonDisconnect->setMinimumWidth(200);
+    layoutSocketStatusR2->addStretch();
+    layoutSocketStatusR2->addWidget(m_labelPeerIP);
+    layoutSocketStatusR2->addSpacing(5);
+    layoutSocketStatusR2->addWidget(m_labelPeerPort);
+    m_labelPeerPort->setMinimumWidth(200);
+
+    layoutSocketStatus->addLayout(layoutSocketStatusR1);
+    layoutSocketStatus->addLayout(layoutSocketStatusR2);
 
     groupBoxSocketStatus->setLayout(layoutSocketStatus);
 
     // Receive data
     QGroupBox *groupBoxReceiveData =
-        new QGroupBox("Received data and notification");
+        new QGroupBox(tr("Received data and notification"));
 
     m_textBrowserReceivedData = new QTextBrowser;
 
@@ -46,7 +63,7 @@ TcpSocketMonitor::TcpSocketMonitor(QWidget *parent) : QWidget(parent)
     groupBoxReceiveData->layout()->addWidget(m_textBrowserReceivedData);
 
     // Send data
-    QGroupBox *groupBoxSendData = new QGroupBox("Send data");
+    QGroupBox *groupBoxSendData = new QGroupBox(tr("Send data"));
 
     m_textEditSendData = new QTextEdit;
 
@@ -54,12 +71,12 @@ TcpSocketMonitor::TcpSocketMonitor(QWidget *parent) : QWidget(parent)
     groupBoxSendData->layout()->addWidget(m_textEditSendData);
 
     // Send data options
-    QGroupBox *groupBoxSendOptions = new QGroupBox("Send options");
+    QGroupBox *groupBoxSendOptions = new QGroupBox(tr("Send options"));
 
     m_comboBoxNumberSend = new QComboBox;
     m_lineEditInterval = new QLineEdit("100");
-    m_pushButtonSendPeriod = new QPushButton("Cycle sending");
-    m_pushButtonStopSend = new QPushButton("Stop sending");
+    m_pushButtonSendPeriod = new QPushButton(tr("Cycle sending"));
+    m_pushButtonStopSend = new QPushButton(tr("Stop sending"));
     connect(m_pushButtonSendPeriod, &QPushButton::clicked, this,
             &TcpSocketMonitor::on_pushButtonSendPeriod_clicked);
     connect(m_pushButtonStopSend, &QPushButton::clicked, this,
@@ -71,18 +88,39 @@ TcpSocketMonitor::TcpSocketMonitor(QWidget *parent) : QWidget(parent)
         m_comboBoxNumberSend->addItem(QString::number(temp), temp);
     }
 
-    QGridLayout *gridLayoutSendOptions = new QGridLayout;
+    QVBoxLayout *layoutSendOptions = new QVBoxLayout;
+    QHBoxLayout *layoutSendOptionsR1 = new QHBoxLayout;
+    QHBoxLayout *layoutSendOptionsR2 = new QHBoxLayout;
 
-    gridLayoutSendOptions->addWidget(new QLabel("Send times"), 0, 0,
-                                     Qt::AlignRight);
-    gridLayoutSendOptions->addWidget(new QLabel("Send interval(ms)"), 1, 0,
-                                     Qt::AlignRight);
-    gridLayoutSendOptions->addWidget(m_comboBoxNumberSend, 0, 1, Qt::AlignLeft);
-    gridLayoutSendOptions->addWidget(m_lineEditInterval, 1, 1, Qt::AlignLeft);
-    gridLayoutSendOptions->addWidget(m_pushButtonSendPeriod, 0, 2);
-    gridLayoutSendOptions->addWidget(m_pushButtonStopSend, 1, 2);
+    QLabel *labelNumberSend = new QLabel(tr("Send times:"));
+    labelNumberSend->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    QLabel *labelInterval = new QLabel(tr("Send interval(ms):"));
+    labelInterval->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
 
-    groupBoxSendOptions->setLayout(gridLayoutSendOptions);
+    layoutSendOptionsR1->addStretch();
+    layoutSendOptionsR1->addWidget(labelNumberSend);
+    labelNumberSend->setMinimumWidth(250);
+    layoutSendOptionsR1->addWidget(m_comboBoxNumberSend);
+    m_comboBoxNumberSend->setFixedWidth(200);
+    layoutSendOptionsR1->addStretch();
+    layoutSendOptionsR1->addWidget(m_pushButtonSendPeriod);
+    m_pushButtonSendPeriod->setMinimumWidth(200);
+    layoutSendOptionsR1->addStretch();
+
+    layoutSendOptionsR2->addStretch();
+    layoutSendOptionsR2->addWidget(labelInterval);
+    labelInterval->setMinimumWidth(250);
+    layoutSendOptionsR2->addWidget(m_lineEditInterval);
+    m_lineEditInterval->setFixedWidth(200);
+    layoutSendOptionsR2->addStretch();
+    layoutSendOptionsR2->addWidget(m_pushButtonStopSend);
+    m_pushButtonStopSend->setMinimumWidth(200);
+    layoutSendOptionsR2->addStretch();
+
+    layoutSendOptions->addLayout(layoutSendOptionsR1);
+    layoutSendOptions->addLayout(layoutSendOptionsR2);
+
+    groupBoxSendOptions->setLayout(layoutSendOptions);
 
     // Layout
     QVBoxLayout *vBoxLayout = new QVBoxLayout;
@@ -124,8 +162,8 @@ void TcpSocketMonitor::setTcpSocket(QTcpSocket *tcpSocket,
     m_pushButtonConnect->setEnabled(true);
     m_pushButtonDisconnect->setEnabled(false);
     on_tcpSocket_stateChanged(m_tcpSocket->state());
-    m_labelPeerIP->setText(QString("Peer IP: %1").arg(m_peerIP.toString()));
-    m_labelPeerPort->setText(QString("Peer port: %1").arg(m_peerPort));
+    m_labelPeerIP->setText(tr("Peer IP: %1").arg(m_peerIP.toString()));
+    m_labelPeerPort->setText(tr("Peer port: %1").arg(m_peerPort));
 
     connect(m_tcpSocket, &QTcpSocket::connected, this,
             &TcpSocketMonitor::on_tcpSocket_connect);
@@ -144,9 +182,9 @@ void TcpSocketMonitor::on_pushButtonConnect_clicked()
     m_tcpSocket->connectToHost(m_peerIP, m_peerPort);
     m_pushButtonConnect->setEnabled(false);
     m_labelLocalIP->setText(
-        QString("Local IP: %1").arg(m_tcpSocket->localAddress().toString()));
+        tr("Local IP: %1").arg(m_tcpSocket->localAddress().toString()));
     m_labelLocalPort->setText(
-        QString("Local port: %1").arg(m_tcpSocket->localPort()));
+        tr("Local port: %1").arg(m_tcpSocket->localPort()));
 }
 
 void TcpSocketMonitor::on_pushButtonDisconnect_clicked()
@@ -186,36 +224,35 @@ void TcpSocketMonitor::on_tcpSocket_stateChanged(
     switch (socketState)
     {
         case QAbstractSocket::UnconnectedState:
-            m_labelSocketStatus->setText("Unconnected");
+            m_labelSocketStatus->setText(tr("Unconnected"));
             m_pushButtonConnect->setEnabled(true);
             m_pushButtonDisconnect->setEnabled(false);
             m_labelLocalIP->clear();
             m_labelLocalPort->clear();
             break;
         case QAbstractSocket::HostLookupState:
-            m_labelSocketStatus->setText("Looking up host");
+            m_labelSocketStatus->setText(tr("Looking up host"));
             break;
         case QAbstractSocket::ConnectingState:
-            m_labelSocketStatus->setText("Connecting");
+            m_labelSocketStatus->setText(tr("Connecting"));
             break;
         case QAbstractSocket::ConnectedState:
-            m_labelSocketStatus->setText("Connected");
+            m_labelSocketStatus->setText(tr("Connected"));
             m_pushButtonConnect->setEnabled(false);
             m_pushButtonDisconnect->setEnabled(true);
             m_labelLocalIP->setText(
-                QString("Local IP: %1")
-                    .arg(m_tcpSocket->localAddress().toString()));
+                tr("Local IP: %1").arg(m_tcpSocket->localAddress().toString()));
             m_labelLocalPort->setText(
-                QString("Local port: %1").arg(m_tcpSocket->localPort()));
+                tr("Local port: %1").arg(m_tcpSocket->localPort()));
             break;
         case QAbstractSocket::BoundState:
-            m_labelSocketStatus->setText("Bound");
+            m_labelSocketStatus->setText(tr("Bound"));
             break;
         case QAbstractSocket::ClosingState:
-            m_labelSocketStatus->setText("Closing");
+            m_labelSocketStatus->setText(tr("Closing"));
             break;
         case QAbstractSocket::ListeningState:
-            m_labelSocketStatus->setText("Listening");
+            m_labelSocketStatus->setText(tr("Listening"));
             break;
         default:
             break;
@@ -238,8 +275,9 @@ void TcpSocketMonitor::on_tcpSocket_readyRead()
 {
     if (m_tcpSocket != nullptr && m_tcpSocket->bytesAvailable() > 0)
     {
-        QString src = QString("%1:%2").arg(m_peerIP.toString()).arg(m_peerPort);
-        QString info = QString("%1 Receiced data from %2:")
+        QString src =
+            QString("[%1:%2]").arg(m_peerIP.toString()).arg(m_peerPort);
+        QString info = tr("%1 Receiced data from %2:")
                            .arg(QTime::currentTime().toString(), src);
         QString data = m_tcpSocket->readAll();
         m_textBrowserReceivedData->append(info);
@@ -251,7 +289,7 @@ void TcpSocketMonitor::on_tcpSocket_readyRead()
 void TcpSocketMonitor::on_tcpSocket_error(QAbstractSocket::SocketError)
 {
     QString msg =
-        QString("%1 Error: %2")
+        tr("%1 Error: %2")
             .arg(QTime::currentTime().toString(), m_tcpSocket->errorString());
     m_textBrowserReceivedData->append(msg);
 }
@@ -262,10 +300,11 @@ void TcpSocketMonitor::on_timer_timeout()
     if (m_tcpSocket != nullptr && m_tcpSocket->isWritable() && !data.isEmpty())
     {
         m_tcpSocket->write(data.toUtf8());
+        QString src =
+            QString("[%1:%2]").arg(m_peerIP.toString()).arg(m_peerPort);
         m_textBrowserReceivedData->append(
-            QString("%1 Send data to %2:%3 :")
-                .arg(QTime::currentTime().toString(), m_peerIP.toString())
-                .arg(m_peerPort));
+            tr("%1 Send data to %2:")
+                .arg(QTime::currentTime().toString(), src));
         m_textBrowserReceivedData->append(data);
     }
     if (++m_currentTimes == m_totalTimes)

@@ -2,16 +2,18 @@
 
 MyMainWindow::MyMainWindow(QWidget *parent) : QMainWindow(parent)
 {
+    setMinimumSize(1600, 900);
+
     // Menubar
     this->setMenuBar(new QMenuBar);
 
-    QMenu *menuCreate = this->menuBar()->addMenu("Create Socket");
-    QAction *actionDelete = this->menuBar()->addAction("Delete Socket");
+    QMenu *menuCreate = this->menuBar()->addMenu(tr("Create Socket"));
+    QAction *actionDelete = this->menuBar()->addAction(tr("Delete Socket"));
 
-    QAction *actionTcpServer = menuCreate->addAction("TCP Server");
-    QAction *actionTcpClient = menuCreate->addAction("TCP Client");
-    QAction *actionUdpSocket = menuCreate->addAction("UDP Socket");
-    QAction *actionUdpGroup = menuCreate->addAction("UDP Group");
+    QAction *actionTcpServer = menuCreate->addAction(tr("TCP Server"));
+    QAction *actionTcpClient = menuCreate->addAction(tr("TCP Client"));
+    QAction *actionUdpSocket = menuCreate->addAction(tr("UDP Socket"));
+    QAction *actionUdpGroup = menuCreate->addAction(tr("UDP Group"));
 
     connect(actionTcpServer, &QAction::triggered, this,
             &MyMainWindow::on_actionTcpServer_triggered);
@@ -33,9 +35,10 @@ MyMainWindow::MyMainWindow(QWidget *parent) : QMainWindow(parent)
     m_treeWidget->setRootIsDecorated(false);
     m_stackedWidget = new QStackedWidget;
 
-    m_treeWidget->setMinimumWidth(200);
-    m_treeWidget->setMaximumWidth(600);
-    m_stackedWidget->setMinimumWidth(600);
+    m_treeWidget->setFixedWidth(600);
+    m_treeWidget->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    m_treeWidget->header()->setStretchLastSection(false);
+    m_stackedWidget->setMinimumWidth(1000);
     connect(m_treeWidget, &QTreeWidget::currentItemChanged, this,
             &MyMainWindow::on_treeWidget_currentItemChanged);
 

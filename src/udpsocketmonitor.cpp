@@ -9,23 +9,25 @@ UdpSocketMonitor::UdpSocketMonitor(QWidget *parent) : QWidget(parent)
     m_totalTimes = 0;
 
     // Socket status
-    QGroupBox *groupBoxSocketStatus = new QGroupBox("Socket Status");
+    QGroupBox *groupBoxSocketStatus = new QGroupBox(tr("Socket Status"));
 
-    QGridLayout *layoutSocketStatus = new QGridLayout;
+    QHBoxLayout *layoutSocketStatus = new QHBoxLayout;
 
     m_labelLocalIP = new QLabel;
     m_labelLocalPort = new QLabel;
     m_labelMulticastIP = new QLabel;
 
-    layoutSocketStatus->addWidget(m_labelLocalIP, 0, 0);
-    layoutSocketStatus->addWidget(m_labelLocalPort, 0, 1);
-    layoutSocketStatus->addWidget(m_labelMulticastIP, 0, 2);
+    layoutSocketStatus->addWidget(m_labelLocalIP);
+    layoutSocketStatus->addSpacing(5);
+    layoutSocketStatus->addWidget(m_labelLocalPort);
+    layoutSocketStatus->addStretch();
+    layoutSocketStatus->addWidget(m_labelMulticastIP);
 
     groupBoxSocketStatus->setLayout(layoutSocketStatus);
 
     // Receive data
     QGroupBox *groupBoxReceiveData =
-        new QGroupBox("Received data and notification");
+        new QGroupBox(tr("Received data and notification"));
 
     m_textBrowserReceivedData = new QTextBrowser;
 
@@ -33,7 +35,7 @@ UdpSocketMonitor::UdpSocketMonitor(QWidget *parent) : QWidget(parent)
     groupBoxReceiveData->layout()->addWidget(m_textBrowserReceivedData);
 
     // Send data
-    QGroupBox *groupBoxSendData = new QGroupBox("Send data");
+    QGroupBox *groupBoxSendData = new QGroupBox(tr("Send data"));
 
     m_textEditSendData = new QTextEdit;
 
@@ -41,14 +43,14 @@ UdpSocketMonitor::UdpSocketMonitor(QWidget *parent) : QWidget(parent)
     groupBoxSendData->layout()->addWidget(m_textEditSendData);
 
     // Send data options
-    QGroupBox *groupBoxSendOptions = new QGroupBox("Send options");
+    QGroupBox *groupBoxSendOptions = new QGroupBox(tr("Send options"));
 
     m_lineEditPeerIp = new QLineEdit("127.0.0.1");
     m_spinBoxPeerPort = new QSpinBox;
     m_comboBoxNumberSend = new QComboBox;
     m_lineEditInterval = new QLineEdit("100");
-    m_pushButtonSendPeriod = new QPushButton("Cycle sending");
-    m_pushButtonStopSend = new QPushButton("Stop sending");
+    m_pushButtonSendPeriod = new QPushButton(tr("Cycle sending"));
+    m_pushButtonStopSend = new QPushButton(tr("Stop sending"));
 
     QString ipRange = "(?:[0-1]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])";  // 255
     QRegExp ipRegex("^" + ipRange + "(\\." + ipRange + ")" + "(\\." + ipRange +
@@ -71,24 +73,53 @@ UdpSocketMonitor::UdpSocketMonitor(QWidget *parent) : QWidget(parent)
         m_comboBoxNumberSend->addItem(QString::number(temp), temp);
     }
 
-    QGridLayout *gridLayoutSendOptions = new QGridLayout;
+    QVBoxLayout *layoutSendOptions = new QVBoxLayout;
+    QHBoxLayout *layoutSendOptionsR1 = new QHBoxLayout;
+    QHBoxLayout *layoutSendOptionsR2 = new QHBoxLayout;
 
-    m_labelPeerIP = new QLabel("Peer IP");
-    m_labelPeerPort = new QLabel("Peer port");
-    gridLayoutSendOptions->addWidget(m_labelPeerIP, 0, 0, Qt::AlignRight);
-    gridLayoutSendOptions->addWidget(m_labelPeerPort, 1, 0, Qt::AlignRight);
-    gridLayoutSendOptions->addWidget(m_lineEditPeerIp, 0, 1);
-    gridLayoutSendOptions->addWidget(m_spinBoxPeerPort, 1, 1);
-    gridLayoutSendOptions->addWidget(new QLabel("Send times"), 0, 2,
-                                     Qt::AlignRight);
-    gridLayoutSendOptions->addWidget(new QLabel("Send interval(ms)"), 1, 2,
-                                     Qt::AlignRight);
-    gridLayoutSendOptions->addWidget(m_comboBoxNumberSend, 0, 3, Qt::AlignLeft);
-    gridLayoutSendOptions->addWidget(m_lineEditInterval, 1, 3, Qt::AlignLeft);
-    gridLayoutSendOptions->addWidget(m_pushButtonSendPeriod, 0, 4);
-    gridLayoutSendOptions->addWidget(m_pushButtonStopSend, 1, 4);
+    m_labelPeerIP = new QLabel(tr("Peer IP:"));
+    m_labelPeerPort = new QLabel(tr("Peer port:"));
+    QLabel *labelNumberSend = new QLabel(tr("Send times:"));
+    QLabel *labelInterval = new QLabel(tr("Send interval(ms):"));
 
-    groupBoxSendOptions->setLayout(gridLayoutSendOptions);
+    layoutSendOptionsR1->addStretch();
+    layoutSendOptionsR1->addWidget(m_labelPeerIP);
+    m_labelPeerIP->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    m_labelPeerIP->setMinimumWidth(200);
+    layoutSendOptionsR1->addWidget(m_lineEditPeerIp);
+    m_lineEditPeerIp->setFixedWidth(200);
+    layoutSendOptionsR1->addStretch();
+    layoutSendOptionsR1->addWidget(labelNumberSend);
+    labelNumberSend->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    labelNumberSend->setMinimumWidth(250);
+    layoutSendOptionsR1->addWidget(m_comboBoxNumberSend);
+    m_comboBoxNumberSend->setFixedWidth(200);
+    layoutSendOptionsR1->addStretch();
+    layoutSendOptionsR1->addWidget(m_pushButtonSendPeriod);
+    m_pushButtonSendPeriod->setMinimumWidth(200);
+    layoutSendOptionsR1->addStretch();
+
+    layoutSendOptionsR2->addStretch();
+    layoutSendOptionsR2->addWidget(m_labelPeerPort);
+    m_labelPeerPort->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    m_labelPeerPort->setMinimumWidth(200);
+    layoutSendOptionsR2->addWidget(m_spinBoxPeerPort);
+    m_spinBoxPeerPort->setFixedWidth(200);
+    layoutSendOptionsR2->addStretch();
+    layoutSendOptionsR2->addWidget(labelInterval);
+    labelInterval->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    labelInterval->setMinimumWidth(250);
+    layoutSendOptionsR2->addWidget(m_lineEditInterval);
+    m_lineEditInterval->setFixedWidth(200);
+    layoutSendOptionsR2->addStretch();
+    layoutSendOptionsR2->addWidget(m_pushButtonStopSend);
+    m_pushButtonStopSend->setMinimumWidth(200);
+    layoutSendOptionsR2->addStretch();
+
+    layoutSendOptions->addLayout(layoutSendOptionsR1);
+    layoutSendOptions->addLayout(layoutSendOptionsR2);
+
+    groupBoxSendOptions->setLayout(layoutSendOptions);
 
     // Layout
     QVBoxLayout *vBoxLayout = new QVBoxLayout;
@@ -127,9 +158,9 @@ void UdpSocketMonitor::setUdpSocket(QUdpSocket *udpSocket)
     connect(m_udpSocket, SIGNAL(error(QAbstractSocket::SocketError)), this,
             SLOT(on_udpSocket_error(QAbstractSocket::SocketError)));
     m_labelLocalIP->setText(
-        QString("Local IP: %1").arg(m_udpSocket->localAddress().toString()));
+        tr("Local IP: %1").arg(m_udpSocket->localAddress().toString()));
     m_labelLocalPort->setText(
-        QString("Local port: %1").arg(m_udpSocket->localPort()));
+        tr("Local port: %1").arg(m_udpSocket->localPort()));
 }
 
 void UdpSocketMonitor::setUdpMulticast(QUdpSocket *udpSocket,
@@ -150,11 +181,11 @@ void UdpSocketMonitor::setUdpMulticast(QUdpSocket *udpSocket,
     connect(m_udpSocket, SIGNAL(error(QAbstractSocket::SocketError)), this,
             SLOT(on_udpSocket_error(QAbstractSocket::SocketError)));
     m_labelLocalIP->setText(
-        QString("Local IP: %1").arg(m_udpSocket->localAddress().toString()));
+        tr("Local IP: %1").arg(m_udpSocket->localAddress().toString()));
     m_labelLocalPort->setText(
-        QString("Local port: %1").arg(m_udpSocket->localPort()));
+        tr("Local port: %1").arg(m_udpSocket->localPort()));
     m_labelMulticastIP->setText(
-        QString("Multicast IP: %1").arg(m_multicastIP.toString()));
+        tr("Multicast IP: %1").arg(m_multicastIP.toString()));
     m_labelPeerIP->hide();
     m_labelPeerPort->hide();
     m_lineEditPeerIp->hide();
@@ -195,11 +226,10 @@ void UdpSocketMonitor::on_udpSocket_readyRead()
         quint16 port;
         m_udpSocket->readDatagram(datagram.data(), datagram.size(),
                                   &hostAddress, &port);
-
+        QString src = QString("[%1:%2]").arg(hostAddress.toString()).arg(port);
         m_textBrowserReceivedData->append(
-            QString("%1 Received data from [%2:%3]:")
-                .arg(QTime::currentTime().toString(), hostAddress.toString())
-                .arg(port));
+            tr("%1 Received data from %2:")
+                .arg(QTime::currentTime().toString(), src));
         m_textBrowserReceivedData->append(datagram);
     }
 }
@@ -207,7 +237,7 @@ void UdpSocketMonitor::on_udpSocket_readyRead()
 void UdpSocketMonitor::on_udpSocket_error(QAbstractSocket::SocketError)
 {
     QString msg =
-        QString("%1 Error: %2")
+        tr("%1 Error: %2")
             .arg(QTime::currentTime().toString(), m_udpSocket->errorString());
     m_textBrowserReceivedData->append(msg);
 }
@@ -219,11 +249,12 @@ void UdpSocketMonitor::on_timer_timeout()
     {
         if (m_isMulticast)
         {
+            QString src = QString("[%1:%2]")
+                              .arg(m_multicastIP.toString())
+                              .arg(m_multicastPort);
             m_textBrowserReceivedData->append(
-                QString("%1 Send data to %2:%3:")
-                    .arg(QTime::currentTime().toString(),
-                         m_multicastIP.toString())
-                    .arg(m_multicastPort));
+                tr("%1 Send data to %2:")
+                    .arg(QTime::currentTime().toString(), src));
             m_textBrowserReceivedData->append(data);
             m_udpSocket->writeDatagram(data.toUtf8(), m_multicastIP,
                                        m_multicastPort);
@@ -234,10 +265,10 @@ void UdpSocketMonitor::on_timer_timeout()
             quint16 peerPort = m_spinBoxPeerPort->value();
             if (!peerIP.isEmpty())
             {
+                QString src = QString("[%1:%2]").arg(peerIP).arg(peerPort);
                 m_textBrowserReceivedData->append(
-                    QString("%1 Send data to %2:%3:")
-                        .arg(QTime::currentTime().toString(), peerIP)
-                        .arg(peerPort));
+                    tr("%1 Send data to %2:")
+                        .arg(QTime::currentTime().toString(), src));
                 m_textBrowserReceivedData->append(data);
                 m_udpSocket->writeDatagram(data.toUtf8(), QHostAddress(peerIP),
                                            peerPort);

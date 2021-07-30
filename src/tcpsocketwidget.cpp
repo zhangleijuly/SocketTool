@@ -4,8 +4,8 @@ TcpSocketWidget::TcpSocketWidget(QWidget *parent) : QWidget(parent)
 {
     m_lineEditPeerIp = new QLineEdit("127.0.0.1");
     m_spinBoxPeerPort = new QSpinBox;
-    QPushButton *pushButtonOK = new QPushButton("OK");
-    QPushButton *pushButtonCancel = new QPushButton("Cancel");
+    QPushButton *pushButtonOK = new QPushButton(tr("OK"));
+    QPushButton *pushButtonCancel = new QPushButton(tr("Cancel"));
 
     QString ipRange = "(?:[0-1]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])";  // 255
     QRegExp ipRegex("^" + ipRange + "(\\." + ipRange + ")" + "(\\." + ipRange +
@@ -23,13 +23,16 @@ TcpSocketWidget::TcpSocketWidget(QWidget *parent) : QWidget(parent)
             &TcpSocketWidget::on_pushButtonCancel_clicked);
 
     QGridLayout *gridLayout = new QGridLayout;
-    gridLayout->addWidget(new QLabel("Peer IP:"), 0, 0, Qt::AlignRight);
-    gridLayout->addWidget(m_lineEditPeerIp, 0, 1);
-    gridLayout->addWidget(new QLabel("Peer port:"), 1, 0, Qt::AlignRight);
-    gridLayout->addWidget(m_spinBoxPeerPort, 1, 1);
+    gridLayout->addWidget(new QLabel(tr("Peer IP:")), 0, 0, Qt::AlignRight);
+    gridLayout->addWidget(m_lineEditPeerIp, 0, 1, Qt::AlignLeft);
+    gridLayout->addWidget(new QLabel(tr("Peer port:")), 1, 0, Qt::AlignRight);
+    gridLayout->addWidget(m_spinBoxPeerPort, 1, 1, Qt::AlignLeft);
     QHBoxLayout *hBoxLayout = new QHBoxLayout;
+    hBoxLayout->addStretch();
     hBoxLayout->addWidget(pushButtonOK);
+    hBoxLayout->addStretch();
     hBoxLayout->addWidget(pushButtonCancel);
+    hBoxLayout->addStretch();
     QVBoxLayout *vBoxLayout = new QVBoxLayout;
     vBoxLayout->addLayout(gridLayout);
     vBoxLayout->addLayout(hBoxLayout);

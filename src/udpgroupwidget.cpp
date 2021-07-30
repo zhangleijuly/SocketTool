@@ -5,8 +5,8 @@ UdpGroupWidget::UdpGroupWidget(QWidget *parent) : QWidget(parent)
     m_comboBoxIP = new QComboBox;
     m_spinBoxPort = new QSpinBox;
     m_lineEditMulticastIP = new QLineEdit("224.0.0.0");
-    QPushButton *pushButtonOK = new QPushButton("OK");
-    QPushButton *pushButtonCancel = new QPushButton("Cancel");
+    QPushButton *pushButtonOK = new QPushButton(tr("OK"));
+    QPushButton *pushButtonCancel = new QPushButton(tr("Cancel"));
 
     m_comboBoxIP->addItem("Any-address", "");
     QList<QHostAddress> listHostAddress = QNetworkInterface::allAddresses();
@@ -34,15 +34,19 @@ UdpGroupWidget::UdpGroupWidget(QWidget *parent) : QWidget(parent)
             &UdpGroupWidget::on_pushButtonCancel_clicked);
 
     QGridLayout *gridLayout = new QGridLayout;
-    gridLayout->addWidget(new QLabel("Server IP:"), 0, 0, Qt::AlignRight);
-    gridLayout->addWidget(m_comboBoxIP, 0, 1);
-    gridLayout->addWidget(new QLabel("Server port:"), 1, 0, Qt::AlignRight);
-    gridLayout->addWidget(m_spinBoxPort, 1, 1);
-    gridLayout->addWidget(new QLabel("Multicast IP:"), 2, 0, Qt::AlignRight);
-    gridLayout->addWidget(m_lineEditMulticastIP, 2, 1);
+    gridLayout->addWidget(new QLabel(tr("Local IP:")), 0, 0, Qt::AlignRight);
+    gridLayout->addWidget(m_comboBoxIP, 0, 1, Qt::AlignLeft);
+    gridLayout->addWidget(new QLabel(tr("Local port:")), 1, 0, Qt::AlignRight);
+    gridLayout->addWidget(m_spinBoxPort, 1, 1, Qt::AlignLeft);
+    gridLayout->addWidget(new QLabel(tr("Multicast IP:")), 2, 0,
+                          Qt::AlignRight);
+    gridLayout->addWidget(m_lineEditMulticastIP, 2, 1, Qt::AlignLeft);
     QHBoxLayout *hBoxLayout = new QHBoxLayout;
+    hBoxLayout->addStretch();
     hBoxLayout->addWidget(pushButtonOK);
+    hBoxLayout->addStretch();
     hBoxLayout->addWidget(pushButtonCancel);
+    hBoxLayout->addStretch();
     QVBoxLayout *vBoxLayout = new QVBoxLayout;
     vBoxLayout->addLayout(gridLayout);
     vBoxLayout->addLayout(hBoxLayout);
@@ -81,7 +85,7 @@ void UdpGroupWidget::on_pushButtonOK_clicked()
             }
             else
             {
-                QString estr = QString("Join multicast group failed! %1")
+                QString estr = tr("Join multicast group failed! %1")
                                    .arg(udpSocket->errorString());
                 QMessageBox::critical(this, tr("Error"), estr);
                 udpSocket->deleteLater();
@@ -89,7 +93,7 @@ void UdpGroupWidget::on_pushButtonOK_clicked()
         }
         else
         {
-            QString estr = QString("Create UDP socket failed! %1")
+            QString estr = tr("Create UDP socket failed! %1")
                                .arg(udpSocket->errorString());
             QMessageBox::critical(this, tr("Error"), estr);
             udpSocket->deleteLater();

@@ -2,9 +2,8 @@
 #define STDAFX_H
 
 #include <QComboBox>
-#include <QGridLayout>
 #include <QGroupBox>
-#include <QHBoxLayout>
+#include <QHeaderView>
 #include <QHostAddress>
 #include <QLabel>
 #include <QLayout>
@@ -24,8 +23,8 @@
 #include <QTextEdit>
 #include <QTime>
 #include <QTimer>
+#include <QTranslator>
 #include <QTreeWidget>
-#include <QVBoxLayout>
 #include <QValidator>
 #include <QVariant>
 #include <QWidget>
