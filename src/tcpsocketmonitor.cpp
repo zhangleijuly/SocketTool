@@ -66,9 +66,15 @@ TcpSocketMonitor::TcpSocketMonitor(QWidget *parent) : QWidget(parent)
     QGroupBox *groupBoxSendData = new QGroupBox(tr("Send data"));
 
     m_textEditSendData = new QTextEdit;
+    m_textEditSendData->installEventFilter(this);
+    m_checkBoxHex = new QCheckBox(tr("Send in hexadecimal"));
+    m_checkBoxHex->setChecked(true);
+    connect(m_checkBoxHex, &QCheckBox::stateChanged, this,
+            &TcpSocketMonitor::on_checkBox_stateChanged);
 
     groupBoxSendData->setLayout(new QVBoxLayout);
     groupBoxSendData->layout()->addWidget(m_textEditSendData);
+    groupBoxSendData->layout()->addWidget(m_checkBoxHex);
 
     // Send data options
     QGroupBox *groupBoxSendOptions = new QGroupBox(tr("Send options"));
@@ -175,6 +181,108 @@ void TcpSocketMonitor::setTcpSocket(QTcpSocket *tcpSocket,
             &TcpSocketMonitor::on_tcpSocket_readyRead);
     connect(m_tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)), this,
             SLOT(on_tcpSocket_error(QAbstractSocket::SocketError)));
+}
+
+bool TcpSocketMonitor::eventFilter(QObject *obj, QEvent *e)
+{
+    if (obj == m_textEditSendData)  //判断过滤事件是否是发送窗口事件
+    {
+        if (m_checkBoxHex->isChecked() == false)  //字符串格式，不过滤
+            return false;                         //不拦截，继续传播
+        else if (m_checkBoxHex->isChecked() == true)  // hex格式
+        {
+            //英文输入法下的键盘事件
+            if (e->type() == QEvent::KeyPress)  //过滤键盘事件
+            {
+                QKeyEvent *keyEvent =
+                    static_cast<QKeyEvent *>(e);  //强行转换为按键事件
+                int keyValue = keyEvent->key();   //获取按键值
+
+                if (keyValue >= Qt::Key_0 && keyValue <= Qt::Key_9)  // 0~9
+                {
+                    formatTextEdit();
+                    return false;  //不拦截，继续传播
+                }
+                else if (keyValue >= Qt::Key_A &&
+                         keyValue <= Qt::Key_F)  // a~f,A~F
+                {
+                    formatTextEdit();
+                    return false;  //不拦截，继续传播
+                }
+                else if (keyValue == Qt::Key_Space ||
+                         keyValue == Qt::Key_Comma ||
+                         keyValue == Qt::Key_Backspace)
+                {
+                    return false;  //不拦截，继续传播，空格，逗号，退格按键
+                }
+                else              //对其他情况拦截
+                    return true;  //拦截，不再传播
+            }
+            //中文输入法状态下的键盘事件
+            else if (e->type() == QEvent::InputMethod)
+            {
+                QInputMethodEvent *keyEvent = dynamic_cast<QInputMethodEvent *>(
+                    e);  //强制转换为输入法事件
+                QString strInput =
+                    keyEvent->commitString();  //此时的strInput就是键盘上按键
+
+                if (strInput
+                        .isEmpty())  //非按键事件不拦截，不加这个操作，窗口不会实时显示输入的按键字母
+                    return false;    //不拦截，继续传播
+
+                strInput.remove(
+                    QRegExp("[^a-fA-F0-9]"));  //对输入的内容筛选，hex格式的留下
+                // keyEvent->setCommitString(strInput);  //更改指针的字符串内容
+                keyEvent->setCommitString("");
+                formatTextEdit(strInput);
+                return false;  //不拦截，继续传播(输入的数据已经被更改了)
+            }
+
+            return false;  //不拦截，不再传播
+        }
+        else
+            return false;  //不拦截，继续传播
+    }
+    else
+        return QWidget::eventFilter(
+            obj,
+            e);  //当不确定是否继续传播时，按照父类的方法来处理.即调用父类的evenFilter函数
+}
+
+void TcpSocketMonitor::formatTextEdit(const QString &str)
+{
+    if (m_checkBoxHex->isChecked())
+    {
+        QString temp = m_textEditSendData->toPlainText() + str;
+        temp = temp.remove(" ");
+        QString res;
+        if (temp.size() <= 1)
+        {
+            res = temp;
+        }
+        else
+        {
+            for (int i = 0; i < (temp.size() - 1) / 2; i++)
+            {
+                res += temp[i * 2];
+                res += temp[i * 2 + 1];
+                res += " ";
+            }
+            if (temp.size() % 2 == 0)
+            {
+                res += temp[temp.size() - 2];
+                res += temp[temp.size() - 1];
+                res += " ";
+            }
+            else
+            {
+                res += temp[temp.size() - 1];
+            }
+        }
+        m_textEditSendData->setText(res);
+        m_textEditSendData->moveCursor(QTextCursor::End,
+                                       QTextCursor::MoveAnchor);
+    }
 }
 
 void TcpSocketMonitor::on_pushButtonConnect_clicked()
@@ -297,6 +405,10 @@ void TcpSocketMonitor::on_tcpSocket_error(QAbstractSocket::SocketError)
 void TcpSocketMonitor::on_timer_timeout()
 {
     QString data = m_textEditSendData->toPlainText();
+    if (m_checkBoxHex->isChecked())
+    {
+        data.remove(" ");
+    }
     if (m_tcpSocket != nullptr && m_tcpSocket->isWritable() && !data.isEmpty())
     {
         m_tcpSocket->write(data.toUtf8());
@@ -313,5 +425,22 @@ void TcpSocketMonitor::on_timer_timeout()
         m_currentTimes = 0;
         m_totalTimes = 0;
         m_pushButtonSendPeriod->setEnabled(true);
+    }
+}
+
+void TcpSocketMonitor::on_checkBox_stateChanged()
+{
+    if (m_checkBoxHex->isChecked())
+    {
+        QString str = m_textEditSendData->toPlainText();
+        str.remove(QRegExp("[^a-fA-F0-9]"));
+        m_textEditSendData->setPlainText(str);
+        formatTextEdit();
+    }
+    else
+    {
+        QString str = m_textEditSendData->toPlainText();
+        str.remove(" ");
+        m_textEditSendData->setPlainText(str);
     }
 }

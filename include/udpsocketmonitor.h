@@ -32,12 +32,15 @@ private:
     QLabel *m_labelPeerPort;
     QTextBrowser *m_textBrowserReceivedData;
     QTextEdit *m_textEditSendData;
+    QCheckBox *m_checkBoxHex;
     QLineEdit *m_lineEditPeerIp;
     QSpinBox *m_spinBoxPeerPort;
     QComboBox *m_comboBoxNumberSend;
     QLineEdit *m_lineEditInterval;
     QPushButton *m_pushButtonSendPeriod;
     QPushButton *m_pushButtonStopSend;
+    bool eventFilter(QObject *obj, QEvent *e);
+    void formatTextEdit(const QString &str = "");
 
 private slots:
     void on_pushButtonSendPeriod_clicked();
@@ -45,6 +48,7 @@ private slots:
     void on_udpSocket_readyRead();
     void on_udpSocket_error(QAbstractSocket::SocketError);
     void on_timer_timeout();
+    void on_checkBox_stateChanged();
 };
 
 #endif  // UDPSOCKETMONITOR_H

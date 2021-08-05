@@ -29,6 +29,7 @@ private:
     QPushButton *m_pushButtonDisconnect;
     QTextBrowser *m_textBrowserReceivedData;
     QTextEdit *m_textEditSendData;
+    QCheckBox *m_checkBoxHex;
     QComboBox *m_comboBoxNumberSend;
     QLineEdit *m_lineEditInterval;
     QPushButton *m_pushButtonSendPeriod;
@@ -38,6 +39,8 @@ private:
     QTimer m_timer;
     int m_currentTimes;
     int m_totalTimes;
+    bool eventFilter(QObject *obj, QEvent *e);
+    void formatTextEdit(const QString &str = "");
 
 private slots:
     void on_pushButtonConnect_clicked();
@@ -50,6 +53,7 @@ private slots:
     void on_tcpSocket_readyRead();
     void on_tcpSocket_error(QAbstractSocket::SocketError);
     void on_timer_timeout();
+    void on_checkBox_stateChanged();
 };
 
 #endif  // TCPSOCKETMONITOR_H

@@ -1,10 +1,13 @@
 #ifndef STDAFX_H
 #define STDAFX_H
 
+#include <QCheckBox>
 #include <QComboBox>
+#include <QEvent>
 #include <QGroupBox>
 #include <QHeaderView>
 #include <QHostAddress>
+#include <QInputMethodEvent>
 #include <QLabel>
 #include <QLayout>
 #include <QLineEdit>
